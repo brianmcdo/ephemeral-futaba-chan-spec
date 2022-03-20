@@ -4,7 +4,7 @@ v0.0.1
 
 ## Concepts
 
-- Ephemeral Thread Lifetime Algorithm `Work in Progress`
+- Ephemerality Algorithm
 - Wallet must hold a minimum of 1 unit to post.
 - Each non-saged reply bumps a thread within the ephemerality algorithm.
 - Spam is curtailed by a asymmetic low compression rate/high decompression rate compression algorithm, stored and signed
@@ -116,6 +116,49 @@ Deleting a thread:
 "message": "{\"delete\": \"2022-03-19T20:34:37+0100\", \"by\":\"5GnVP7jkGUjsqhHdtBp1xSgcnNjbUDAnpfYTLWarRHG9QTWm\"}"
 ```
 
-## Ephemerality Algorithm
+## Ephemerality Function
 
-`Work in Progress`
+In classic futaba style we want threads to be deleted from the chain after a maximum post count threshold.
+
+This threshold needs to be dynamically calculated by the network in order to scale with user interaction.
+
+### Deletion by Age
+
+Threads older than 48 hours will be removed from the chain.
+
+### Deletion by Thread Count
+
+Multiplier: 1.5
+
+Minimum Count: 50
+
+1. Sort threads by last non-saged reply timestamp (descending order).
+2. Calculate number of threads on-chain per hour.
+3. Calculate the average, multiplied by a constant multiplier.
+4. Return the largest value between the result and the minimum constant.
+5. Remove threads whose sort order fall below the threshold.
+
+### Deletion by Reply Count
+
+Multiplier 0.5
+Minimum Count: 10
+
+1. Sort replies by last non-saged reply timestamp (descending order).
+2. Calculate number of replies per thread on-chain per hour.
+3. Calculate the average, multiplied by a constant multiplier.
+4. Return the largest value between the result and the minimum constant.
+5. Remove threads with reply counts whose sort order fall below the threshold.
+
+### Calculating Ephemerality Threshold
+
+```javascript
+// arr: list of thread or reply counts
+const ephemeralityThreshold = (arr, multiplier = 1.5, min = 50) => {
+  // avg w/ min value
+  return Math.max((arr.reduce((a, b) => a + b, 0) / arr.length) * multiplier, min);
+}
+
+ephemeralityThreshold([123, 60, 200, 23, 45, 60])
+// result (max posts): 127.75
+
+```
