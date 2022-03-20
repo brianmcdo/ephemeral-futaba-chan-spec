@@ -5,9 +5,8 @@ v0.0.1
 ## Concepts
 
 - Ephemerality Algorithm
-- Wallet must hold a minimum of 1 unit to post.
-- Each non-saged reply bumps a thread within the ephemerality algorithm.
-- Spam is curtailed by a asymmetic low compression rate/high decompression rate compression algorithm, stored and signed
+- Minimum existential deposit to post
+- Spam is curtailed by an asymmetric low compression rate/high decompression rate compression algorithm, stored and signed
   as the signature of each post (contenders: brieflz -9, zstd -22).
 
 ## Spec
@@ -16,30 +15,41 @@ v0.0.1
 
 ```json5
 {
-  // network generated id
+  // Network Generated ID
   "_txid": "0xb90d5acb8733c0d36ff3a0fd2f71eef37022d335e854d77d8ccf650cc292d145",
-  // network generated ISO 8601 timestamp
+  
+  // Network Generated ISO 8601 timestamp
   "_date": "2022-03-19T20:34:37+0100",
-  // poster public key
+  
+  // Signer Public Key
   "_pk": "5GnVP7jkGUjsqhHdtBp1xSgcnNjbUDAnpfYTLWarRHG9QTWm",
-  // payload signature, exluding (^\_|^\+)
-  // using brieflz -9 to create signature limits spammers by computational overhead (this algorithm may change)
+  
+  // Compressed and Private Key Encrypted Payload, excluding (^\_|^\+)
+  // When decryption and/or decompression fails to match included
+  // payload, message is discarded and prevented from entering the block.
+  // 
+  // Format: <PROTOCOL> <OPTIONS>: <COMPRESSED_ENCRYPTED_PAYLOAD>
   "+sig": "brieflz -9: <sig>",
-  // Post Subject (Used when creating a thread)
+  
+  // Post Subject - On Thread Create
   "subject": "My First Post",
+  
   // Post Asset - Client Brings Off-Chain Storage
   "asset": "protocol://path-to-asset",
-  // Post Message - Client brings own msg format text, markdown, 2chan, bbode, json, etc
+  
+  // Post Message - Client brings own msg format text, markdown, 2chan, bbcode, json, etc
   "message": "My First Message",
-  // Thread Reply TXID (Used only when replying to a thread) 
+  
+  // Thread Reply TXID - On Reply
   "reply-to": "0xb90d5acb8733c0d36ff3a0fd2f71eef37022d335e854d77d8ccf650cc292d145",
-  // Post Tag (Used when creating a thread)
+  
+  // Post Tag - On Thread Create
+  // Utilized for segmenting boards.
   "tag": "general",
-  // Sage Flag (Default False): Will not bump thread
+  
+  // Sage Flag (Default: False) - On true, post is ignored by ephemerality algorithm. 
   "sage": false
-  // saged as to not influcing bumping a thread
 }
-
 ```
 
 ## API
@@ -49,19 +59,13 @@ v0.0.1
 `newMessage(keys={public,private}, message)`
 
 ```json5
-    {
+{
   "+sig": "brieflz: <sig>",
-  // payload signature, exludes (^\_|^\+)
   "subject": "My First Post",
-  // Subject
   "asset": "protocol://path-to-asset",
-  // client brings own asset storage
   "message": "My First Message",
-  // client brings own format text, markdown, 2chan, bbode, json, etc
   "tag": "general"
-  // tags
 }
-
 ```
 
 ### Replying
@@ -69,7 +73,7 @@ v0.0.1
 `newMessage(keys={public,private}, message)`
 
 ```json5
-   {
+{
   "+sig": "brieflz: <sig>",
   "asset": "protocol://path-to-asset",
   "message": "My First Reply",
@@ -87,7 +91,7 @@ to which administrative public keys to honor.
 `newMessage(keys={public,private}, message)`
 
 ```json5
- {
+{
   "+sig": "brieflz: <sig>",
   "reply-to": "0xb90d5acb8733c0d36ff3a0fd2f71eef37022d335e854d77d8ccf650cc292d145",
   // This can be any format json, yaml, msgpack, etc.
@@ -116,11 +120,11 @@ Deleting a thread:
 "message": "{\"delete\": \"2022-03-19T20:34:37+0100\", \"by\":\"5GnVP7jkGUjsqhHdtBp1xSgcnNjbUDAnpfYTLWarRHG9QTWm\"}"
 ```
 
-## Ephemerality Function
+## Ephemerality Algorithm
 
-In classic futaba style we want threads to be deleted from the chain after a maximum post count threshold.
+In classic futaba style threads must be ephemeral and discarded from the chain under certain conditions.
 
-This threshold needs to be dynamically calculated by the network in order to scale with user interaction.
+To determine this three set of thresholds can trigger thread removal.
 
 ### Deletion by Age
 
