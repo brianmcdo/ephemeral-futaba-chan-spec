@@ -143,11 +143,12 @@ Minimum Count: 50
 Multiplier 0.5
 Minimum Count: 10
 
-1. Sort replies by last non-saged reply timestamp (descending order).
-2. Calculate number of replies per thread on-chain per hour.
-3. Calculate the average, multiplied by a constant multiplier.
-4. Return the largest value between the result and the minimum constant.
-5. Remove threads with reply counts whose sort order fall below the threshold.
+1. Retrieve threads with last replies older than 1 hour.
+2. Sort replies by last non-saged reply timestamp (descending order).
+3. Calculate number of replies per thread on-chain per hour.
+4. Calculate the average, multiplied by a constant multiplier.
+5. Return the largest value between the result and the minimum constant.
+6. Remove threads with reply counts whose sort order fall below the threshold.
 
 ### Calculating Ephemerality Threshold
 
