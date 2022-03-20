@@ -43,9 +43,9 @@ v0.0.1
   // Thread Reply TXID - On Reply
   "reply-to": "0xb90d5acb8733c0d36ff3a0fd2f71eef37022d335e854d77d8ccf650cc292d145",
   
-  // Post Tag - On Thread Create
+  // Channel - On Thread Create
   // Utilized for segmenting boards.
-  "tag": "general",
+  "channel": "general",
   
   // Sage Flag (Default: False) - On true, post is ignored by ephemerality algorithm. 
   "sage": false
@@ -64,7 +64,7 @@ v0.0.1
   "subject": "My First Post",
   "asset": "protocol://path-to-asset",
   "message": "My First Message",
-  "tag": "general"
+  "channel": "general"
 }
 ```
 
